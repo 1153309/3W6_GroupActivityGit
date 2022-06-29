@@ -11,9 +11,11 @@ namespace CrazyBooks_Models.Models
     {
         public int Id { get; set; }
 
-        [ForeignKey("CalendarEvent")]
-        public int CalendarEvent_Id { get; set; }
+        public string Description { get; set; }
+        public string Details { get; set; }
 
-        public CalendarEvent CalendarEvent { get; set; }
+        [ForeignKey("CalendarEventId")]
+        public int CalendarEventId { get; set; }
+        public CalendarEvent Evenment { get; set; }
     }
 }
