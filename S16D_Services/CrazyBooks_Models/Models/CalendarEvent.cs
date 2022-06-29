@@ -16,5 +16,7 @@ namespace CrazyBooks_Models.Models
 
         [Display(Name ="Date")]
         public DateTime Date { get; set; }
+
+        public IEnumerable<Booking> Bookings { get; set; }
     }
 }
