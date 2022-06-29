@@ -1,0 +1,81 @@
+﻿@using System.Reflection
+@using CrazyBooks_Models.Models
+@using CrazyBooks_Models.ViewModels
+@model BooksUpsertVM
+@{
+ViewData["Title"] = "@Model.GeneralViewInfos.PageTitle";
+}
+
+<div class="row justify-content-center view-upsert">
+    <div class="col-8">
+        <div class="h1 text-primary mb-4">@Model.GeneralViewInfos.PageHeading</div>
+        <div class="hstack gap-4 mb-2 page-actions">
+            @foreach (PageLinkInfos pli in Model.GeneralViewInfos.Links)
+            {
+                @if (pli.UsesId)
+                {
+                    ViewData["Id"] = Model.Id;
+                    <partial name="_PageLinkWithId" model="pli" view-data="ViewData" />
+                }
+                else
+                {
+                    <partial name="_PageLink" model="pli" />
+                }
+            }
+        </div>
+        <form asp-action="Upsert">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="IsCreate" />
+            <input type="hidden" asp-for="Book.Id" />
+            <div class="form-floating mb-3">
+                <input asp-for="Book.Title" class="form-control" id="Title" placeholder="@Html.DisplayNameFor(model => model.Book.Title)" />
+                <label for="Title" asp-for="Book.Title"></label>
+                <span asp-validation-for="Book.Title" class="text-danger"></span>
+            </div>
+            <div class="form-floating mb-3">
+                <input asp-for="Book.ISBN" class="form-control" id="ISBN" placeholder="@Html.DisplayNameFor(model => model.Book.ISBN)" />
+                <label for="ISBN" asp-for="Book.ISBN"></label>
+                <span asp-validation-for="Book.ISBN" class="text-danger"></span>
+            </div>
+            <div class="form-floating mb-3">
+                <input asp-for="Book.Price" class="form-control" id="Price" placeholder="@Html.DisplayNameFor(model => model.Book.Price)" />
+                <label for="Price" asp-for="Book.Price"></label>
+                <span asp-validation-for="Book.Price" class="text-danger"></span>
+            </div>
+            <div class="form-check mb-3">
+                <input asp-for="Book.Promo" class="form-check-input" id="Promo" />
+                <label for="Promo" class="form-check-label" asp-for="Book.Promo"></label>
+            </div>
+            <div class="form-check mb-3">
+                <input asp-for="Book.Available" class="form-check-input" id="Available" />
+                <label for="Available" class="form-check-label" asp-for="Book.Available"></label>
+            </div>
+            <div class="form-floating mb-3">
+                <input asp-for="Book.Resume" class="form-control" id="Resume" placeholder="@Html.DisplayNameFor(model => model.Book.Resume)" />
+                <label for="Resume" asp-for="Book.Resume"></label>
+                <span asp-validation-for="Book.Resume" class="text-danger"></span>
+            </div>
+            <div class="form-floating mb-3">
+                <input asp-for="Book.PublishedDate" class="form-control" id="PublishedDate" placeholder="@Html.DisplayNameFor(model => model.Book.PublishedDate)" />
+                <label for="PublishedDate" asp-for="Book.PublishedDate"></label>
+                <span asp-validation-for="Book.PublishedDate" class="text-danger"></span>
+            </div>
+            <div class="form-floating mb-3">
+                <select asp-for="Book.Subject_Id" class="form-select" placeholder="@Html.DisplayNameFor(model => model.Book.Subject_Id)" asp-items="Model.ListForSubject_Id"></select>
+                <label asp-for="Book.Subject_Id"></label>
+                <span asp-validation-for="Book.Subject_Id" class="text-danger"></span>
+            </div>
+            <div class="form-floating mb-3">
+                <select asp-for="Book.Publisher_Id" class="form-select" placeholder="@Html.DisplayNameFor(model => model.Book.Publisher_Id)" asp-items="Model.ListForPublisher_Id"></select>
+                <label asp-for="Book.Publisher_Id"></label>
+                <span asp-validation-for="Book.Publisher_Id" class="text-danger"></span>
+            </div>
+            <div class="text-center">
+                <button type="submit" class="btn btn-primary">@Model.GeneralViewInfos.SubmitButtonText</button>
+            </div>
+        </form>
+    </div>
+</div>
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

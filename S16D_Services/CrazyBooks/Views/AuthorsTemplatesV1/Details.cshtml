@@ -1,0 +1,32 @@
+﻿@model CrazyBooks_Models.Models.Author
+
+@{
+    ViewData["Title"] = "Details";
+}
+
+<h1>Details</h1>
+
+<div>
+    <h4>Author</h4>
+    <hr />
+<div class="hstack gap-4 mb-2 page-actions">
+    <div class="h1 page-action"><a asp-action="Index"><i class="bi bi-arrow-up-left-circle-fill" title="Retour à la liste"></i></a></div>
+    <div class="h1 page-action"><a asp-action="Edit" asp-route-id="@Model.Id"><i class="bi bi-pencil-fill" title="Modifier"></i></a></div>
+</div>
+    <dl class="row">
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.FirstName)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.FirstName)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.LastName)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.LastName)
+        </dd>
+    </dl>
+</div>
+<div>
+</div>

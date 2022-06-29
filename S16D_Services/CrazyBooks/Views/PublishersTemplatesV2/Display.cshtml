@@ -1,0 +1,56 @@
+﻿@using System.Reflection
+@using CrazyBooks_Models.Models
+@using CrazyBooks_Models.ViewModels
+@model PublishersDisplayVM
+@{
+ViewData["Title"] = "@Model.GeneralViewInfos.PageTitle";
+}
+
+<div class="row justify-content-center view-display">
+    <div class="col-8">
+        <div class="h1 text-primary mb-4">@Model.GeneralViewInfos.PageHeading</div>
+        <div class="hstack gap-4 mb-2 page-actions">
+            @foreach (PageLinkInfos pli in Model.GeneralViewInfos.Links)
+            {
+                @if (pli.UsesId)
+                {
+                    ViewData["Id"] = Model.Id;
+                    <partial name="_PageLinkWithId" model="pli" view-data="ViewData" />
+                }
+                else
+                {
+                    <partial name="_PageLink" model="pli" />
+                }
+            }
+        </div>
+        <div class="form-floating mb-3">
+            <input asp-for="Publisher.Name" readonly class="form-control" id="Name" placeholder="@Html.DisplayNameFor(model => model.Publisher.Name)" />
+            <script>var ta = document.querySelector('#Name'); ta.style.height = ta.scrollHeight + 2 + 'px';</script>
+            <label for="Name" asp-for="Publisher.Name"></label>
+            <span asp-validation-for="Publisher.Name" class="text-danger"></span>
+        </div>
+        <div class="form-floating mb-3">
+            <input asp-for="Publisher.Speciality" readonly class="form-control" id="Speciality" placeholder="@Html.DisplayNameFor(model => model.Publisher.Speciality)" />
+            <script>var ta = document.querySelector('#Speciality'); ta.style.height = ta.scrollHeight + 2 + 'px';</script>
+            <label for="Speciality" asp-for="Publisher.Speciality"></label>
+            <span asp-validation-for="Publisher.Speciality" class="text-danger"></span>
+        </div>
+        <div class="form-floating mb-3">
+            <input asp-for="Publisher.PublisherSite" readonly class="form-control" id="PublisherSite" placeholder="@Html.DisplayNameFor(model => model.Publisher.PublisherSite)" />
+            <script>var ta = document.querySelector('#PublisherSite'); ta.style.height = ta.scrollHeight + 2 + 'px';</script>
+            <label for="PublisherSite" asp-for="Publisher.PublisherSite"></label>
+            <span asp-validation-for="Publisher.PublisherSite" class="text-danger"></span>
+        </div>
+        @if (!Model.IsDetails)
+        {
+        <form asp-action="Delete" method="post">
+            <input type="hidden" asp-for="Publisher.Id" />
+            <div class="text-center">
+                <button type="submit" class="btn btn-primary">@Model.GeneralViewInfos.SubmitButtonText</button>
+            </div>
+        </form>
+        }
+    </div>
+</div>
+@section Scripts {
+}

@@ -1,0 +1,175 @@
+﻿@inherits Microsoft.VisualStudio.Web.CodeGeneration.Templating.RazorTemplateBase
+@using Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
+@using System.Collections.Generic
+@using System.Linq
+@using System.Reflection
+@using System.ComponentModel.DataAnnotations
+@@using System.Reflection
+@@using @GetModelsRootPath()
+@@using @GetViewModelsRootPath()
+@@model @GetViewModel()
+@{
+List<string> textAreaIds = new List<string>();
+string pkName = GetPrimaryKeyName();
+if (Model.IsPartialView)
+{
+}
+else if (Model.IsLayoutPageSelected)
+{
+@:@@{
+@:ViewData["Title"] = "@@Model.GeneralViewInfos.PageTitle";
+if (!string.IsNullOrEmpty(Model.LayoutPageFile))
+{
+    @:Layout = "@Model.LayoutPageFile";
+}
+@:}
+@:
+}
+else
+{
+@:@@{
+@:Layout = null;
+@:}
+@:
+@:<!DOCTYPE html>
+@:
+@:<html>
+@:<head>
+    @:<meta name="viewport" content="width=device-width" />
+    @:<title>@Model.ViewName</title>
+@:</head>
+@:<body>
+    //    PushIndent("    ");
+}
+@:<div class="row justify-content-center view-display">
+    @:<div class="col-8">
+        @:<div class="h1 text-primary mb-4">@@Model.GeneralViewInfos.PageHeading</div>
+        @:<div class="hstack gap-4 mb-2 page-actions">
+            @:@@foreach (PageLinkInfos pli in Model.GeneralViewInfos.Links)
+            @:{
+                @:@@if (pli.UsesId)
+                @:{
+                    @:ViewData["Id"] = Model.Id;
+                    @:<partial name="_PageLinkWithId" model="pli" view-data="ViewData" />
+                @:}
+                @:else
+                @:{
+                    @:<partial name="_PageLink" model="pli" />
+                @:}
+            @:}
+        @:</div>
+        foreach (var item in GetProperties())
+        {
+            if (!(item.PropertyName == pkName))
+            {
+                bool isCheckbox = item.TypeName.Equals("System.Boolean");
+                if (isCheckbox)
+                {
+        @:<div class="form-check mb-3">
+            @:<input asp-for="@Model.ModelMetadata.ModelType.Name.@item.PropertyName" readonly class="form-check-input" id="@item.PropertyName" />
+            @:<label for="@item.PropertyName" class="form-check-label" asp-for="@Model.ModelMetadata.ModelType.Name.@item.PropertyName"></label>
+        @:</div>
+                }
+                else if (IsMultiLineText(item.PropertyName))
+                {
+                    textAreaIds.Add(@item.PropertyName);
+        @:<div class="form-floating mb-3">
+            @:<textarea asp-for="@Model.ModelMetadata.ModelType.Name.@item.PropertyName" readonly class="form-control" id="@item.PropertyName" placeholder="@@Html.DisplayNameFor(model => model.@Model.ModelMetadata.ModelType.Name.@item.PropertyName)"></textarea>
+            @:<label for="@item.PropertyName" asp-for="@Model.ModelMetadata.ModelType.Name.@item.PropertyName"></label>
+            @:<span asp-validation-for="@Model.ModelMetadata.ModelType.Name.@item.PropertyName" class="text-danger"></span>
+        @:</div>
+                }
+                else
+                {
+        @:<div class="form-floating mb-3">
+            @:<input asp-for="@Model.ModelMetadata.ModelType.Name.@item.PropertyName" readonly class="form-control" id="@item.PropertyName" placeholder="@@Html.DisplayNameFor(model => model.@Model.ModelMetadata.ModelType.Name.@item.PropertyName)" />
+            @:<script>var ta = document.querySelector('#@item.PropertyName'); ta.style.height = ta.scrollHeight + 2 + 'px';</script>
+            @:<label for="@item.PropertyName" asp-for="@Model.ModelMetadata.ModelType.Name.@item.PropertyName"></label>
+            @:<span asp-validation-for="@Model.ModelMetadata.ModelType.Name.@item.PropertyName" class="text-danger"></span>
+        @:</div>
+                }
+            }
+        }
+        @:@@if (!Model.IsDetails)
+        @:{
+        @:<form asp-action="Delete" method="post">
+            @:<input type="hidden" asp-for="@Model.ModelMetadata.ModelType.Name.@pkName" />
+            @:<div class="text-center">
+                @:<button type="submit" class="btn btn-primary">@@Model.GeneralViewInfos.SubmitButtonText</button>
+            @:</div>
+        @:</form>
+        @:}
+    @:</div>
+@:</div>
+@:@@section Scripts {
+foreach(string id in textAreaIds)
+{
+    @:<script>var ta = document.querySelector('#@id'); function resizeTextArea(item) { item.style.height = item.scrollHeight + 2 + 'px'; } resizeTextArea(ta);</script>
+}
+@:}
+if (!Model.IsPartialView && !Model.IsLayoutPageSelected)
+{
+    //ClearIndent();
+@:</body>
+@:</html>
+}
+}
+@functions
+{
+    string GetPrimaryKeyName()
+    {
+        return (Model.ModelMetadata.PrimaryKeys != null && Model.ModelMetadata.PrimaryKeys.Length == 1)
+        ? Model.ModelMetadata.PrimaryKeys[0].PropertyName
+        : null;
+    }
+
+    string GetValueExpression(IPropertyMetadata property)
+    {
+        return property.PropertyName;
+    }
+
+    string GetValueExpression(INavigationMetadata navigation)
+    {
+        return navigation.AssociationPropertyName;
+    }
+
+    string GetDisplayViewModelFullyQualifiedName()
+    {
+        return GetViewModelsRootPath() + "." + GetDisplayViewModel() + ", " + Model.ModelMetadata.ModelType.Assembly.FullName;
+    }
+
+    string GetViewModel()
+    {
+        return Model.ModelMetadata.EntitySetName + "DisplayVM";
+    }
+
+    string GetDisplayViewModel()
+    {
+        return Model.ModelMetadata.ModelType.Name + "ForDisplayVM";
+    }
+
+    string GetModelsRootPath()
+    {
+        return string.Join('.', new List<string>((IEnumerable<string>)Model.ViewDataTypeName.Split('.')).SkipLast(1));
+    }
+
+    string GetViewModelsRootPath()
+    {
+        return string.Join('.', new List<string>((IEnumerable<string>)GetModelsRootPath().Split('.')).SkipLast(1)) + ".ViewModels";
+    }
+
+    Type GetDisplayType()
+    {
+        return Type.GetType(GetDisplayViewModelFullyQualifiedName());
+    }
+
+    IEnumerable<IPropertyMetadata> GetProperties()
+    {
+        return GetDisplayType().GetProperties().Select(p => new PropertyMetadata(p)).ToList();
+    }
+
+    bool IsMultiLineText(string propName)
+    {
+        return GetDisplayType().GetProperty(propName).GetCustomAttribute<DataTypeAttribute>()?.DataType == DataType.MultilineText;
+    }
+}

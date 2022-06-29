@@ -1,0 +1,50 @@
+﻿@*View présentant deux listes, une permettant de filtrer l'autre
+  Liste des livres (book) filtrés par sujet (subject) en utilisant JavaScript et un ViewModel et une PartialView*@
+@model CrazyBooks_Models.ViewModels.HomeVM
+@inject IViewLocalizer Localizer
+﻿@{
+    ViewData["Title"] = ViewBag.Title;
+}
+
+<div class="text-center">
+  <h1 class="display-4">@Locals["HomeTitle"]</h1>
+  <h2 class="display-6">@Locals["HomeInstructions"]</h2>
+</div>
+
+<div class="container p-3 DivBgForm">
+  <div class="text-center">
+    <button class="btn btn-primary filter-button" data-filter="all">All</button>
+    @foreach (var obj in Model.Subjects)
+    {
+      <button class="btn btn-outline-primary filter-button" data-filter="@obj.Name.Replace(' ','_')">
+        @obj.Name
+      </button>
+    }
+  </div>
+  <br />
+  <div class="row">
+    @foreach (var item in Model.Books)
+    {
+      <partial name="_BookCard" model="item" />//Afficher tous les Books
+    }
+  </div>
+</div>
+@section Scripts{
+  <script>
+    $(document).ready(function () {
+
+      $(".filter-button").click(function () {
+
+        var value = $(this).attr('data-filter');
+        if (value == "all") {
+          $('.filter').show('1000');
+        }
+        else {
+          $(".filter").not('.' + value).hide('3000');
+          $('.filter').filter('.' + value).show('3000');
+
+        }
+      });
+
+    });</script>
+}

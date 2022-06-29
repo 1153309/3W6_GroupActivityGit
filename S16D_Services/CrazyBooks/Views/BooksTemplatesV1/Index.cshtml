@@ -1,0 +1,79 @@
+﻿@model IEnumerable<CrazyBooks_Models.Models.Book>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+<div class="hstack gap-4 mb-2 page-actions">
+    <div class="h1 page-action"><a asp-action="Create"><i class="bi bi-plus-circle-fill" title="Ajouter"></i></a></div>
+</div>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Title)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ISBN)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Price)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Promo)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Available)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.PublishedDate)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Subject)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Publisher)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Title)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.ISBN)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Price)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Promo)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Available)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.PublishedDate)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Subject.Name)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Publisher.Name)
+            </td>
+            <td class="text-end">
+                <div class="hstack gap-3">
+                    <div class="ms-auto h5"><a asp-action="Edit" asp-route-id="@item.Id"><i class="bi bi-pencil-fill" title="Modifier"></i></a></div>
+                    <div class="h5"><a asp-action="Details" asp-route-id="@item.Id"><i class="bi bi-info-circle-fill" title="Voir les détails"></i></a></div>
+                    <div class="h5"><a asp-action="Delete" asp-route-id="@item.Id"><i class="bi bi-trash3-fill" title="Supprimer"></i></a></div>
+                </div>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

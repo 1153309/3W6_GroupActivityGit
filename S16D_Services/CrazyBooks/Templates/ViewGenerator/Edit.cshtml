@@ -1,0 +1,185 @@
+﻿@inherits Microsoft.VisualStudio.Web.CodeGeneration.Templating.RazorTemplateBase
+@using Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
+@using System.Collections.Generic
+@using System.Linq
+@using System.Reflection
+@@using System.Reflection
+@@using @GetModelsRootPath()
+@@using @GetViewModelsRootPath()
+@@model @GetViewModel()
+@{
+    List<string> textAreaIds = new List<string>();
+    string pkName = GetPrimaryKeyName();
+    if (Model.IsPartialView)
+    {
+    }
+    else if (Model.IsLayoutPageSelected)
+    {
+@:@@{
+@:ViewData["Title"] = "@@Model.GeneralViewInfos.PageTitle";
+if (!string.IsNullOrEmpty(Model.LayoutPageFile))
+        {
+    @:Layout = "@Model.LayoutPageFile";
+}
+@:}
+@:
+    }
+    else
+    {
+@:@@{
+@:Layout = null;
+@:}
+@:
+@:<!DOCTYPE html>
+@:
+@:<html>
+@:<head>
+    @:<meta name="viewport" content="width=device-width" />
+    @:<title>@Model.ViewName</title>
+@:</head>
+@:<body>
+    //    PushIndent("    ");
+    }
+@:<div class="row justify-content-center view-upsert">
+    @:<div class="col-8">
+        @:<div class="h1 text-primary mb-4">@@Model.GeneralViewInfos.PageHeading</div>
+        @:<div class="hstack gap-4 mb-2 page-actions">
+            @:@@foreach (PageLinkInfos pli in Model.GeneralViewInfos.Links)
+            @:{
+                @:@@if (pli.UsesId)
+                @:{
+                    @:ViewData["Id"] = Model.Id;
+                    @:<partial name="_PageLinkWithId" model="pli" view-data="ViewData" />
+                @:}
+                @:else
+                @:{
+                    @:<partial name="_PageLink" model="pli" />
+                @:}
+            @:}
+        @:</div>
+        @:<form asp-action="Upsert">
+            @:<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="IsCreate" />
+            foreach (PropertyMetadata property in Model.ModelMetadata.Properties)
+            {
+                if (property.IsPrimaryKey)
+                {
+            @:<input type="hidden" asp-for="@Model.ModelMetadata.ModelType.Name.@property.PropertyName" />
+                    continue;
+                }
+                if (property.Scaffold)
+                {
+                    if (property.IsReadOnly)
+                    {
+                        continue;
+                    }
+
+                    if (property.IsForeignKey)
+                    {
+            @:<div class="form-floating mb-3">
+                @:<select asp-for="@Model.ModelMetadata.ModelType.Name.@property.PropertyName" class="form-select" placeholder="@@Html.DisplayNameFor(model => model.@Model.ModelMetadata.ModelType.Name.@property.PropertyName)" asp-items="Model.ListFor@(property.PropertyName)"></select>
+                @:<label asp-for="@Model.ModelMetadata.ModelType.Name.@property.PropertyName"></label>
+                @:<span asp-validation-for="@Model.ModelMetadata.ModelType.Name.@property.PropertyName" class="text-danger"></span>
+            @:</div>
+                        continue;
+                    }
+
+                    bool isCheckbox = property.TypeName.Equals("System.Boolean");
+                    if (isCheckbox)
+                    {
+            @:<div class="form-check mb-3">
+                @:<input asp-for="@Model.ModelMetadata.ModelType.Name.@property.PropertyName" class="form-check-input" id="@property.PropertyName" />
+                @:<label for="@property.PropertyName" class="form-check-label" asp-for="@Model.ModelMetadata.ModelType.Name.@property.PropertyName"></label>
+            @:</div>
+                    }
+                    else if (property.IsEnum && !property.IsEnumFlags)
+                    {
+            @:<div class="form-floating mb-3">
+                @:<select asp-for="@Model.ModelMetadata.ModelType.Name.@property.PropertyName" class="form-select" id="@property.PropertyName" placeholder="@@Html.DisplayNameFor(model => model.@Model.ModelMetadata.ModelType.Name.@property.PropertyName)"></select>
+                @:<label asp-for="@Model.ModelMetadata.ModelType.Name.@property.PropertyName"></label>
+                @:<span asp-validation-for="@Model.ModelMetadata.ModelType.Name.@property.PropertyName" class="text-danger"></span>
+            @:</div>
+                    }
+                    else if (property.IsMultilineText)
+                    {
+                        textAreaIds.Add(@property.PropertyName);
+            @:<div class="form-floating mb-3">
+                @:<textarea asp-for="@Model.ModelMetadata.ModelType.Name.@property.PropertyName" class="form-control" id="@property.PropertyName" placeholder="@@Html.DisplayNameFor(model => model.@Model.ModelMetadata.ModelType.Name.@property.PropertyName)"></textarea>
+                @:<label for="@property.PropertyName" asp-for="@Model.ModelMetadata.ModelType.Name.@property.PropertyName"></label>
+                @:<span asp-validation-for="@Model.ModelMetadata.ModelType.Name.@property.PropertyName" class="text-danger"></span>
+            @:</div>
+                    }
+                    else
+                    {
+            @:<div class="form-floating mb-3">
+                @:<input asp-for="@Model.ModelMetadata.ModelType.Name.@property.PropertyName" class="form-control" id="@property.PropertyName" placeholder="@@Html.DisplayNameFor(model => model.@Model.ModelMetadata.ModelType.Name.@property.PropertyName)" />
+                @:<label for="@property.PropertyName" asp-for="@Model.ModelMetadata.ModelType.Name.@property.PropertyName"></label>
+                @:<span asp-validation-for="@Model.ModelMetadata.ModelType.Name.@property.PropertyName" class="text-danger"></span>
+            @:</div>
+                    }
+                }
+                // Ideally we shouldn't be here  but if the user marks the foreign key as [ScaffoldColumn(false)], we want to atleast try to make it work.
+                else if (property.IsForeignKey)
+                {
+            @:<input type="hidden" asp-for="@Model.ModelMetadata.ModelType.Name.@property.PropertyName" />
+                    continue;
+                }
+            }
+            @:<div class="text-center">
+                @:<button type="submit" class="btn btn-primary">@@Model.GeneralViewInfos.SubmitButtonText</button>
+            @:</div>
+        @:</form>
+    @:</div>
+@:</div>
+@:@@section Scripts {
+foreach(string id in textAreaIds)
+{
+    @:<script>var ta = document.querySelector('#@id'); function resizeTextArea(item) { item.style.height = item.scrollHeight + 2 + 'px'; } resizeTextArea(ta); document.addEventListener("keydown", function (e) { resizeTextArea(e.target); });</script>
+}
+if (Model.ReferenceScriptLibraries)
+{
+    @:@@{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
+@:}
+// The following code closes the tag used in the case of a view using a layout page and the body and html tags in the case of a regular view page
+if (!Model.IsPartialView && !Model.IsLayoutPageSelected)
+{
+@:</body>
+@:</html>
+}
+}
+@functions
+{
+    string GetPrimaryKeyName()
+    {
+        return (Model.ModelMetadata.PrimaryKeys != null && Model.ModelMetadata.PrimaryKeys.Length == 1)
+        ? Model.ModelMetadata.PrimaryKeys[0].PropertyName
+        : null;
+    }
+
+    string GetAssociationName(IPropertyMetadata property)
+    {
+        //Todo: Implement properly.
+        return property.PropertyName;
+    }
+
+    string GetValueExpression(IPropertyMetadata property)
+    {
+        return property.PropertyName;
+    }
+
+    string GetViewModel()
+    {
+        return Model.ModelMetadata.EntitySetName + "UpsertVM";
+    }
+
+    string GetModelsRootPath()
+    {
+        return string.Join('.', new List<string>((IEnumerable<string>)Model.ViewDataTypeName.Split('.')).SkipLast(1));
+    }
+
+    string GetViewModelsRootPath()
+    {
+        return string.Join('.', new List<string>((IEnumerable<string>)GetModelsRootPath().Split('.')).SkipLast(1)) + ".ViewModels";
+    }
+}

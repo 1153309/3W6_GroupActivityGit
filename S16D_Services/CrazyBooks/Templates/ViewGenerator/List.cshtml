@@ -1,0 +1,168 @@
+﻿@inherits Microsoft.VisualStudio.Web.CodeGeneration.Templating.RazorTemplateBase
+@using Microsoft.VisualStudio.Web.CodeGeneration.EntityFrameworkCore
+@using System.Collections.Generic
+@using System.Linq
+@using System.Reflection
+@@using System.Reflection
+@@using @GetModelsRootPath()
+@@using @GetViewModelsRootPath()
+@@model @GetViewModel()
+@{
+    string pkName = GetPrimaryKeyName();
+    if (Model.IsPartialView)
+    {
+    }
+    else if (Model.IsLayoutPageSelected)
+    {
+@:@@{
+@:ViewData["Title"] = "@@Model.GeneralViewInfos.PageTitle";
+if (!string.IsNullOrEmpty(Model.LayoutPageFile))
+{
+    @:Layout = "@Model.LayoutPageFile";
+}
+@:}
+@:
+    }
+    else
+    {
+@:@@{
+@:Layout = null;
+@:}
+@:
+@:<!DOCTYPE html>
+@:
+@:<html>
+@:<head>
+    @:<meta name="viewport" content="width=device-width" />
+    @:<title>@Model.ViewName</title>
+@:</head>
+@:<body>
+    //    PushIndent("    ");
+}
+@:<div class="row justify-content-center view-index">
+    @:<div class="col">
+        @:<div class="h1 text-primary mb-4">@@Model.GeneralViewInfos.PageHeading</div>
+        @:<div class="hstack gap-4 mb-2 page-actions">
+            @:@@foreach (PageLinkInfos pli in Model.GeneralViewInfos.Links)
+            @:{
+                @:@@if (pli.UsesId)
+                @:{
+                    @:ViewData["Id"] = Model.Id;
+                    @:<partial name="_PageLinkWithId" model="pli" view-data="ViewData" />
+                @:}
+                @:else
+                @:{
+                    @:<partial name="_PageLink" model="pli" />
+                @:}
+            @:}
+        @:</div>
+        @:<div class="table-responsive">
+            @:<table class="table border-primary">
+                @:<thead class="text-bg-primary">
+                    @:<tr>
+                        foreach (var item in GetProperties())
+                        {
+                            if (!(item.PropertyName == pkName))
+                            {
+                          <th>
+                              @@Html.DisplayNameFor(model => model.@(Model.ModelMetadata.EntitySetName).First().@GetValueExpression(item))
+                          </th>
+                            }
+                        }
+                        @:<th class="col-2 col-lg-1 text-center" scope="col">Actions</th>
+                    @:</tr>
+                @:</thead>
+                @:<tbody class="text-primary">
+                    @:@@foreach (var item in Model.@(Model.ModelMetadata.EntitySetName)) {
+                    @:<tr>
+                        foreach (var item in GetProperties())
+                        {
+                            if (!(item.PropertyName == pkName))
+                            {
+                        <td>
+                            @@Html.DisplayFor(modelItem => item.@GetValueExpression(item))
+                        </td>
+                            }
+                        }
+                        if (pkName != null)
+                        {
+                        @:<td class="text-end">
+                            @:<div class="hstack gap-3">
+                                @:<div class="ms-auto h5"><a asp-action="Upsert" asp-route-id="@@item.@pkName"><i class="bi bi-pencil-fill" title="Modifier"></i></a></div>
+                                @:<div class="h5"><a asp-action="Details" asp-route-id="@@item.@pkName"><i class="bi bi-info-circle-fill" title="Voir les détails"></i></a></div>
+                                @:<div class="h5"><a asp-action="Delete" asp-route-id="@@item.@pkName"><i class="bi bi-trash3-fill" title="Supprimer"></i></a></div>
+                            @:</div>
+                        @:</td>
+                        }
+                        else
+                        {
+                        <td>
+                            @@Html.ActionLink("Edit", "Edit", new { /* id=item.PrimaryKey */ }) |
+                            @@Html.ActionLink("Details", "Details", new { /* id=item.PrimaryKey */ }) |
+                            @@Html.ActionLink("Delete", "Delete", new { /* id=item.PrimaryKey */ })
+                        </td>
+                        }
+                    @:</tr>
+                    @:}
+                @:</tbody>
+            @:</table>
+        @:</div>
+    @:</div>
+@:</div>
+if (!Model.IsPartialView && !Model.IsLayoutPageSelected)
+{
+    //ClearIndent();
+@:</body>
+@:</html>
+}
+
+}
+@functions
+{
+    string GetPrimaryKeyName()
+    {
+        return (Model.ModelMetadata.PrimaryKeys != null && Model.ModelMetadata.PrimaryKeys.Length == 1)
+        ? Model.ModelMetadata.PrimaryKeys[0].PropertyName
+        : null;
+    }
+
+    string GetValueExpression(IPropertyMetadata property)
+    {
+        return property.PropertyName;
+    }
+
+    string GetValueExpression(INavigationMetadata navigation)
+    {
+        return navigation.AssociationPropertyName;
+    }
+
+    string GetListViewModelFullyQualifiedName()
+    {
+        return GetViewModelsRootPath() + "." + GetListViewModel() + ", " + Model.ModelMetadata.ModelType.Assembly.FullName;
+    }
+
+    string GetViewModel()
+    {
+        return Model.ModelMetadata.EntitySetName + "IndexVM";
+    }
+
+    string GetListViewModel()
+    {
+        return Model.ModelMetadata.ModelType.Name + "ForListVM";
+    }
+
+    string GetModelsRootPath()
+    {
+        return string.Join('.', new List<string>((IEnumerable<string>)Model.ViewDataTypeName.Split('.')).SkipLast(1));
+    }
+
+    string GetViewModelsRootPath()
+    {
+        return string.Join('.', new List<string>((IEnumerable<string>)GetModelsRootPath().Split('.')).SkipLast(1)) + ".ViewModels";
+    }
+
+    IEnumerable<IPropertyMetadata> GetProperties()
+    {
+        return Type.GetType(GetListViewModelFullyQualifiedName()).GetProperties().Select(p => new PropertyMetadata(p)).ToList();
+    }
+}

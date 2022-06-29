@@ -1,0 +1,55 @@
+﻿@using System.Reflection
+@using CrazyBooks_Models.Models
+@using CrazyBooks_Models.ViewModels
+@model SubjectsIndexVM
+@{
+ViewData["Title"] = "@Model.GeneralViewInfos.PageTitle";
+}
+
+<div class="row justify-content-center view-index">
+    <div class="col">
+        <div class="h1 text-primary mb-4">@Model.GeneralViewInfos.PageHeading</div>
+        <div class="hstack gap-4 mb-2 page-actions">
+            @foreach (PageLinkInfos pli in Model.GeneralViewInfos.Links)
+            {
+                @if (pli.UsesId)
+                {
+                    ViewData["Id"] = Model.Id;
+                    <partial name="_PageLinkWithId" model="pli" view-data="ViewData" />
+                }
+                else
+                {
+                    <partial name="_PageLink" model="pli" />
+                }
+            }
+        </div>
+        <div class="table-responsive">
+            <table class="table border-primary">
+                <thead class="text-bg-primary">
+                    <tr>
+                          <th>
+                              @Html.DisplayNameFor(model => model.Subjects.First().Name)
+                          </th>
+                        <th class="col-2 col-lg-1 text-center" scope="col">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="text-primary">
+                    @foreach (var item in Model.Subjects) {
+                    <tr>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Name)
+                        </td>
+                        <td class="text-end">
+                            <div class="hstack gap-3">
+                                <div class="ms-auto h5"><a asp-action="Upsert" asp-route-id="@item.Id"><i class="bi bi-pencil-fill" title="Modifier"></i></a></div>
+                                <div class="h5"><a asp-action="Details" asp-route-id="@item.Id"><i class="bi bi-info-circle-fill" title="Voir les détails"></i></a></div>
+                                <div class="h5"><a asp-action="Delete" asp-route-id="@item.Id"><i class="bi bi-trash3-fill" title="Supprimer"></i></a></div>
+                            </div>
+                        </td>
+                    </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
